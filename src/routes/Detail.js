@@ -18,19 +18,30 @@ let Box = styled.div`
 `;
 
 function Detail(props) {
-  useEffect(() => {
-    setTimeout(() => {
-      document.querySelector(".alert").style.display = "none";
-    }, 2000);
-  });
   let [count, setCount] = useState(0);
+  let [alert, setAlert] = useState(true);
+  let [num, setNum] = useState("");
+  useEffect(() => {
+    let timer = setTimeout(() => {
+      setAlert(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    if (isNaN(num) == true) {
+      window.alert("그러지마세요");
+    }
+  }, [num]);
 
   let { id } = useParams();
   let result = props.shoes.find((item) => item.id === Number(id));
-  console.log(result);
   return (
     <div className="container">
-      <div className="alert alert-warning"> 2초이내 구매시 할인</div>
+      {alert === true && (
+        <div className="alert alert-warning"> 2초이내 구매시 할인</div>
+      )}
+
+      {count}
       <button
         onClick={() => {
           setCount(count + 1);
@@ -49,6 +60,13 @@ function Detail(props) {
           />
         </div>
         <div className="col-md-6">
+          <input
+            placeholder="숫자만 입력하세요"
+            onChange={(e) => {
+              setNum(e.target.value);
+              //   console.log(e);
+            }}
+          ></input>
           <h4 className="pt-5">{result.title}</h4>
           <p>{result.content}</p>
           <p>{result.price}</p>
