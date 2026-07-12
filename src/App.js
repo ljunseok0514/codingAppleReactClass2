@@ -1,15 +1,21 @@
 import "./App.css";
-import { useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { props } from "react";
 import { Button, Navbar, Container, Nav } from "react-bootstrap";
 import bg from "./img/bg-1.png";
 import data from "./data.js";
 import { Routes, Route, Link, useNavigate, Outlet } from "react-router-dom";
 import Detail from "./routes/Detail.js";
+import axios from "axios";
+export let Context1 = createContext();
 
 function App() {
-  let [shoes] = useState(data);
   let navigate = useNavigate();
+  let [shoes, setShoes] = useState(data);
+  let [재고] = useState([10, 11, 12]);
+  let [clickCount, setClickCount] = useState(0);
+  let [loading, setLoading] = useState(false);
+
   return (
     <div className="App">
       <Navbar bg="dark" variant="dark">
@@ -35,19 +41,76 @@ function App() {
       </Navbar>
       <Link to="/">홈</Link>
       <Link to="/detail">상세페이지</Link>
-      {/* <div
+      <div
         className="main-bg"
         style={{ backgroundImage: "url(" + bg + ")" }}
       ></div>
       <div className="container">
         <div className="row">
           {shoes.map((a, i) => {
-            return <Card shoes={shoes[i]} i={i + 1} />;
+            return <Card key={i} shoes={shoes[i]} i={i + 1} />;
           })}
         </div>
-      </div> */}
+      </div>
+      {clickCount >= 2 ? (
+        ""
+      ) : (
+        <button
+          onClick={() => {
+            let nextCount = clickCount + 1;
+            setClickCount(nextCount);
+            if (nextCount === 1) {
+              setLoading(true);
+              axios
+                .get("https://codingapple1.github.io/shop/data2.json")
+                .then((결과) => {
+                  console.log(결과.data);
+                  let copy = [...shoes, ...결과.data];
+                  setShoes(copy);
+                  console.log("end");
+                  setLoading(false);
+                })
+                .catch(() => {
+                  console.log("실패함");
+                  console.log("end");
+                  setLoading(false);
+                });
+            } else if (nextCount === 2) {
+              axios
+                .get("https://codingapple1.github.io/shop/data3.json")
+                .then((결과) => {
+                  console.log(결과.data);
+                  let copy = [...shoes, ...결과.data];
+                  setShoes(copy);
+                })
+                .catch(() => {
+                  console.log("실패함");
+                });
+            } else {
+              return;
+            }
+          }}
+        >
+          더보기
+        </button>
+      )}
+      {loading === true ? (
+        <div className="loading">
+          <p>로딩중</p>
+        </div>
+      ) : (
+        ""
+      )}
+
       <Routes>
-        <Route path="/detail/:id" element={<Detail shoes={shoes}/>} />
+        <Route
+          path="/detail/:id"
+          element={
+            <Context1.Provider value={{ 재고, shoes }}>
+              <Detail shoes={shoes} />
+            </Context1.Provider>
+          }
+        />
         <Route path="/about" element={<About />}>
           <Route path="member" element={<div>멤버임</div>} />
           <Route path="location" element={<div>장소임</div>} />
