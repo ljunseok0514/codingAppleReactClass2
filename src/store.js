@@ -13,12 +13,22 @@ let stock = createSlice({
       //   state[action.payload].count++
     },
     addState(state, action) {
-      state.push(action.payload);
+      let found = state.find((item) => item.id === action.payload.id);
+
+      if (found) {
+        found.count += 1;
+      } else {
+        let newItem = { ...action.payload, count: 1 };
+        state.push(newItem);
+      }
+    },
+    delState(state, action) {
+      return state.filter((item) => item.id !== action.payload);
     },
   },
 });
 
-export let { increaseCount, addState } = stock.actions;
+export let { increaseCount, addState, delState } = stock.actions;
 
 export default configureStore({
   reducer: {
